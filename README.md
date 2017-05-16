@@ -12,6 +12,8 @@
 ## To Note:
 	*Vision tracking for Tower is ^^UNTESTED^^
 	*Prefered IP setup is static IP, untested for MDNS
+	*roboRIO streams camera USB servers on ports 1181+
+	*Example- 10.0.66.2:1181 //Streams the first camera server.
 	
 ## License:
 	*The 2017-FRC-Dual-Tracker-System is licensed under the GNU General Public License v3.0.
