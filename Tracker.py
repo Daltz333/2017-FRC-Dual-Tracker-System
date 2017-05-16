@@ -121,7 +121,7 @@ def trackTower():
 
                 #put values to networktable
                 Table.putNumber("TowerCenterOfTargetCoords", CenterOfTargetCoords)
-                Table.putNumber("TowerCenterOfTarget", CenterOfTargetX)
+                Table.putNumber("TowerCenterOfTarget", CenterOfTargetY)
                 Table.putBoolean("TowerNoContoursFound", False)
                  
             else: #contour not in aspect ratio
