@@ -116,8 +116,8 @@ def trackTower():
              
             #only run if contour is within ratioValues
             if (ratioMin <= aspect_ratio1 <= ratioMax):
-                CenterOfTargetX = (xg+wg/2) #double check
-                CenterOfTargetCoords = (xg+hg+CenterOfTargetX) #double check
+                CenterOfTargetY = (yg+hg/2)
+                CenterOfTargetCoords = (yg+hg+CenterOfTargetY)
 
                 #put values to networktable
                 Table.putNumber("TowerCenterOfTargetCoords", CenterOfTargetCoords)
@@ -128,11 +128,10 @@ def trackTower():
                 Table.putBoolean("TowerNoContoursFound", True)
 
     except IndexError: #no contours found
-        Table.putBoolean("TableNoContoursFound", True)
+        Table.putBoolean("TowerNoContoursFound", True)
 
 def pegComplete():
     #Receive Data from roboRIO
-    NetworkTables.setServerMode()
     Table = NetworkTables.getTable(Constants.MainTable)
     
     return Table.getBoolean(pegStatus, False)
