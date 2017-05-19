@@ -9,9 +9,9 @@ TowerStream = 'http://10.0.66.2:1181/stream.mjpg' #roboRIO usb stream
 
 #color ranges to filter
 #peg color range
-peg_green_lower = np.array([72, 114, 169],np.uint8)
+peg_green_lower = np.array([70, 0, 145],np.uint8)
 peg_green_upper = np.array([255, 255, 255],np.uint8)
 
 #tower color range
-tower_green_lower = np.array([72, 114, 169],np.uint8)
+tower_green_lower = np.array([143, 114, 128],np.uint8)
 tower_green_upper = np.array([255, 255, 255],np.uint8)

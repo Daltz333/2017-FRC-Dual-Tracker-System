@@ -9,18 +9,16 @@ logging.basicConfig(level=logging.DEBUG)
 NetworkTables.setClientMode()
 NetworkTables.initialize(server=constants.ServerIP)
 Table = NetworkTables.getTable(constants.MainTable)
-
 #seperate camera read from processing to reduce lag when
 #switching targets. Needs to be tested
 camera0 = cv2.VideoCapture(constants.PegStream)
-(grabbed0, frame0) = camera.read()
 camera1 = cv2.VideoCapture(constants.TowerStream)
-(grabbed1, frame1) = camera.read()
-
     
 def trackPeg():
     while (True):
-        #stop
+        (grabbed0, frame0) = camera0.read()
+#        (grabbed1, frame1) = camera1.read()
+        
         if (Table.getBoolean("pegStatus", False) == True):
             break
         else:
@@ -30,7 +28,7 @@ def trackPeg():
         hsv = cv2.cvtColor(frame0, cv2.COLOR_BGR2HSV)
 
         #create the range of colour min/max
-        green_range = cv2.inRange(hsv, constants.peg_green_lower, green_upper)
+        green_range = cv2.inRange(hsv, constants.peg_green_lower, constants.peg_green_upper)
 
         #create blank area for sort
         areaArray = []
@@ -52,7 +50,7 @@ def trackPeg():
             if len(contours) > 0: 
             #draw it #find second biggest contour, mark it.
                  x, y, w, h = cv2.boundingRect(secondlargestcontour)
-                 cv2.drawContours(frame, secondlargestcontour, -1, (0, 0, 255), 0)
+                 cv2.drawContours(frame0, secondlargestcontour, -1, (0, 0, 255), 0)
         
                  #find biggest contour, mark it
                  green=max(contours, key=cv2.contourArea)
@@ -94,6 +92,9 @@ def trackPeg():
             
 def trackTower():
     while (True):
+#        (grabbed0, frame0) = camera0.read()
+        (grabbed1, frame1) = camera1.read()
+
         if (Table.getBoolean("pegStatus", True) == False):
             break
         else:
@@ -118,15 +119,17 @@ def trackTower():
                  aspect_ratio1 = float(wg)/hg
 
                  #set min and max ratios
-                 ratioMax = 3.92
-                 ratioMin = 3.55
+                 ratioMax = 1.5
+                 ratioMin = 0.9
                  
                  #only run if contour is within ratioValues
                  if (ratioMin <= aspect_ratio1 <= ratioMax):
+                     CenterOfTargetY = (yg+hg/2)
+                     CenterOfTargetCoordsY = (yg+hg+CenterOfTargetY)
 
                      #put values to networktable
-                     Table.putNumber("TowerCenterOfTargetCoords", CenterOfTargetCoords)
-                     Table.putNumber("TowerCenterOfTarget", CenterOfTarget)
+                     Table.putNumber("TowerCenterOfTargetCoords", CenterOfTargetCoordsY)
+                     Table.putNumber("TowerCenterOfTarget", CenterOfTargetY)
                      Table.putBoolean("TowerNoContoursFound", False)
                      
                  else: #contour not in aspect ratio
