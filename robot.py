@@ -1,10 +1,17 @@
 import tracker
+import constants
+from networktables import NetworkTables
 
-#if statement in each method determines which is ran.
-#if pegComplete == True, ends the trackPeg method and only
-#then does it run the trackTower method. The inverse applies
-#and the trackPeg begins again.
+NetworkTables.setClientMode()
+NetworkTables.initialize(server=constants.ServerIP)
+Table = NetworkTables.getTable(constants.MainTable)
 
 while(True):
-    tracker.trackPeg()
-    tracker.trackTower()
+    PiState = Table.getNumber("PiState", 0)
+    
+    if(PiState == 0):
+        tracker.trackPeg()
+    elif(PiState == 1):
+        tracker.trackTower()
+    else:
+        continue

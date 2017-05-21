@@ -3,14 +3,14 @@ import cv2
 import logging
 import mtcam0
 import mtcam1
+import robot
 import constants
 from networktables import NetworkTables
 
-#set networktable information
+#NOTES:
+#TEST IF MAIN ROBOT.PY CAN SET THE NETWORKTABLE INFORMATION
+#IF SO STATEMACHINE IS A SUCCESS
 logging.basicConfig(level=logging.DEBUG)
-NetworkTables.setClientMode()
-NetworkTables.initialize(server=constants.ServerIP)
-Table = NetworkTables.getTable(constants.MainTable)
 
 #grab frames using multithreading
 #and initialize the camera
@@ -20,10 +20,11 @@ vs1 = mtcam1(src=constants.TowerStream).start()
     
 def trackPeg():
     while (True):
-        if (Table.getBoolean("pegStatus", False) == True):
+
+        if(robot.Table.getNumber("PiState", 0) != 0):
             break
         else:
-            print("Tracking Peg...")
+            pass
 
         #grab current frame from multithreaded process
         (grabbed0, frame0) = vs0.read()
@@ -84,24 +85,24 @@ def trackPeg():
                         CenterOfTargetCoords = (xg+w+CenterOfTarget)
 
                      #put values to networktable
-                     Table.putNumber("PegCenterOfTargetCoords", CenterOfTargetCoords)
-                     Table.putNumber("PegCenterOfTarget", CenterOfTarget)
-                     Table.putBoolean("PegNoContoursFound", False)
+                     robot.Table.putNumber("PegCenterOfTargetCoords", CenterOfTargetCoords)
+                     robot.Table.putNumber("PegCenterOfTarget", CenterOfTarget)
+                     robot.Table.putBoolean("PegNoContoursFound", False)
                      
                  else: #contour not in aspect ratio
-                     Table.putBoolean("PegNoContoursFound", True)
+                     robot.Table.putBoolean("PegNoContoursFound", True)
 
         except IndexError: #no contours found
-            Table.putBoolean("PegNoContoursFound", True)
+            robot.Table.putBoolean("PegNoContoursFound", True)
             
 def trackTower():
     while (True):
-        #break the loop if status from roboRIO
-        if (Table.getBoolean("pegStatus", True) == False):
+        
+        if(robot.Table.getNumber("PiState", 0) != 1):
             break
         else:
-            print("Tracking Tower...")
-
+            pass
+        
         #grab current frame from thread
         (grabbed1, frame1) = vs1.read()
         
@@ -131,20 +132,16 @@ def trackTower():
                  if (ratioMin <= aspect_ratio1 <= ratioMax):
 
                      #put values to networktable
-                     Table.putNumber("TowerCenterOfTargetCoords", CenterOfTargetCoords)
-                     Table.putNumber("TowerCenterOfTarget", CenterOfTarget)
-                     Table.putBoolean("TowerNoContoursFound", False)
+                     robot.Table.putNumber("TowerCenterOfTargetCoords", CenterOfTargetCoords)
+                     robot.Table.putNumber("TowerCenterOfTarget", CenterOfTarget)
+                     robot.Table.putBoolean("TowerNoContoursFound", False)
                      
                  else: #contour not in aspect ratio
-                     Table.putBoolean("TowerNoContoursFound", True)
+                     robot.Table.putBoolean("TowerNoContoursFound", True)
 
         except IndexError: #no contours found
-            Table.putBoolean("TowerNoContoursFound", True)
+            robot.Table.putBoolean("TowerNoContoursFound", True)
 
-
-def pegComplete():
-    #grab peg status from roboRIO
-    return Table.getBoolean("pegStatus", False)
 
 #roboRIO streams camera USB servers on ports 1181+
 #Example- 10.0.66.2:1181
