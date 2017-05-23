@@ -1,11 +1,9 @@
 import numpy as np
 import cv2
 import logging
-import mtcam0
-import mtcam1
-import robot
 import constants
 from networktables import NetworkTables
+from imutils.video import WebcamVideoStream
 
 #NOTES:
 #TEST IF MAIN ROBOT.PY CAN SET THE NETWORKTABLE INFORMATION
@@ -14,20 +12,23 @@ logging.basicConfig(level=logging.DEBUG)
 
 #grab frames using multithreading
 #and initialize the camera
-vs0 = mtcam0(src=constants.PegStream).start()
-vs1 = mtcam1(src=constants.TowerStream).start()
+vs0 = WebcamVideoStream(src=constants.PegStream).start()
+vs1 = WebcamVideoStream(src=constants.TowerStream).start()
 
+NetworkTables.setClientMode()
+NetworkTables.initialize(server=constants.ServerIP)
+Table = NetworkTables.getTable(constants.MainTable)
     
 def trackPeg():
     while (True):
 
-        if(robot.Table.getNumber("PiState", 0) != 0):
+        if(Table.getNumber("PiState", 0) != 0):
             break
         else:
             pass
 
         #grab current frame from multithreaded process
-        (grabbed0, frame0) = vs0.read()
+        frame0 = vs0.read()
         
         #convert to HSV
         hsv = cv2.cvtColor(frame0, cv2.COLOR_BGR2HSV)
@@ -85,26 +86,26 @@ def trackPeg():
                         CenterOfTargetCoords = (xg+w+CenterOfTarget)
 
                      #put values to networktable
-                     robot.Table.putNumber("PegCenterOfTargetCoords", CenterOfTargetCoords)
-                     robot.Table.putNumber("PegCenterOfTarget", CenterOfTarget)
-                     robot.Table.putBoolean("PegNoContoursFound", False)
+                     Table.putNumber("PegCenterOfTargetCoords", CenterOfTargetCoords)
+                     Table.putNumber("PegCenterOfTarget", CenterOfTarget)
+                     Table.putBoolean("PegNoContoursFound", False)
                      
                  else: #contour not in aspect ratio
-                     robot.Table.putBoolean("PegNoContoursFound", True)
+                     Table.putBoolean("PegNoContoursFound", True)
 
         except IndexError: #no contours found
-            robot.Table.putBoolean("PegNoContoursFound", True)
+            Table.putBoolean("PegNoContoursFound", True)
             
 def trackTower():
     while (True):
         
-        if(robot.Table.getNumber("PiState", 0) != 1):
+        if(Table.getNumber("PiState", 0) != 1):
             break
         else:
             pass
         
         #grab current frame from thread
-        (grabbed1, frame1) = vs1.read()
+        frame1 = vs1.read()
         
         #convert to HSV
         hsv = cv2.cvtColor(frame1, cv2.COLOR_BGR2HSV)
@@ -131,19 +132,21 @@ def trackTower():
                  #only run if contour is within ratioValues
                  if (ratioMin <= aspect_ratio1 <= ratioMax):
                      CenterOfTargetY = (yg+hg/2)
--                    CenterOfTargetCoordsY = (yg+hg+CenterOfTargetY)
+                     CenterOfTargetCoordsY = (yg+hg+CenterOfTargetY)
 
                      #put values to networktable
-                     robot.Table.putNumber("TowerCenterOfTargetCoords", CenterOfTargetCoordsY)
-                     robot.Table.putNumber("TowerCenterOfTarget", CenterOfTargetY)
-                     robot.Table.putBoolean("TowerNoContoursFound", False)
+                     Table.putNumber("TowerCenterOfTargetCoords", CenterOfTargetCoordsY)
+                     Table.putNumber("TowerCenterOfTarget", CenterOfTargetY)
+                     Table.putBoolean("TowerNoContoursFound", False)
                      
                  else: #contour not in aspect ratio
-                     robot.Table.putBoolean("TowerNoContoursFound", True)
+                     Table.putBoolean("TowerNoContoursFound", True)
 
         except IndexError: #no contours found
-            robot.Table.putBoolean("TowerNoContoursFound", True)
+            Table.putBoolean("TowerNoContoursFound", True)
 
+def piState():
+    return Table.getNumber("PiState", 0)
 
 #roboRIO streams camera USB servers on ports 1181+
 #Example- 10.0.66.2:1181
