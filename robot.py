@@ -1,6 +1,5 @@
 import tracker
 import constants
-from networktables import NetworkTables
 
 while(True):
     PiState = tracker.piState()
