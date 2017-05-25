@@ -10,7 +10,6 @@
 	*Code is reusable.
 
 ## To Note:
-	*Vision tracking for Tower is ^^UNTESTED^^
 	*Prefered IP setup is static IP, untested for MDNS
 	*roboRIO streams camera USB servers on ports 1181+
 	*Example- 10.0.66.2:1181 //Streams the first camera server.
