@@ -3,27 +3,33 @@ import cv2
 import logging
 import constants
 from networktables import NetworkTables
+from imutils.video import WebcamVideoStream
 
-#set networktable information
+#NOTES:
+#TEST IF MAIN ROBOT.PY CAN SET THE NETWORKTABLE INFORMATION
+#IF SO STATEMACHINE IS A SUCCESS
 logging.basicConfig(level=logging.DEBUG)
+
+#grab frames using multithreading
+#and initialize the camera
+vs0 = WebcamVideoStream(src=constants.PegStream).start()
+vs1 = WebcamVideoStream(src=constants.TowerStream).start()
+
 NetworkTables.setClientMode()
 NetworkTables.initialize(server=constants.ServerIP)
 Table = NetworkTables.getTable(constants.MainTable)
-#seperate camera read from processing to reduce lag when
-#switching targets. Needs to be tested
-camera0 = cv2.VideoCapture(constants.PegStream)
-camera1 = cv2.VideoCapture(constants.TowerStream)
     
 def trackPeg():
     while (True):
-        (grabbed0, frame0) = camera0.read()
-#        (grabbed1, frame1) = camera1.read()
-        
-        if (Table.getBoolean("pegStatus", False) == True):
+
+        if(Table.getNumber("PiState", 0) != 0):
             break
         else:
-            print("Tracking Peg...")
+            pass
 
+        #grab current frame from multithreaded process
+        frame0 = vs0.read()
+        
         #convert to HSV
         hsv = cv2.cvtColor(frame0, cv2.COLOR_BGR2HSV)
 
@@ -65,7 +71,8 @@ def trackPeg():
                  ratioMin = 0.30
                  
                  #only run if contour is within ratioValues
-                 if (aspect_ratio1 and aspect_ratio2 <= ratioMax and aspect_ratio1 and aspect_ratio2 >= ratioMin):
+                 if (aspect_ratio1 and aspect_ratio2 <= constants.peg_ratioMax 
+				 and aspect_ratio1 and aspect_ratio2 >= constants.peg_ratioMin):
 
                      #make the largest values always right rect
                      #this prevents negative values when not wanted
@@ -92,14 +99,15 @@ def trackPeg():
             
 def trackTower():
     while (True):
-#        (grabbed0, frame0) = camera0.read()
-        (grabbed1, frame1) = camera1.read()
-
-        if (Table.getBoolean("pegStatus", True) == False):
+        
+        if(Table.getNumber("PiState", 0) != 1):
             break
         else:
-            print("Tracking Tower...")
-            
+            pass
+        
+        #grab current frame from thread
+        frame1 = vs1.read()
+        
         #convert to HSV
         hsv = cv2.cvtColor(frame1, cv2.COLOR_BGR2HSV)
 
@@ -119,11 +127,11 @@ def trackTower():
                  aspect_ratio1 = float(wg)/hg
 
                  #set min and max ratios
-                 ratioMax = 1.5
-                 ratioMin = 0.9
+                 ratioMax = 3.92
+                 ratioMin = 3.55
                  
                  #only run if contour is within ratioValues
-                 if (ratioMin <= aspect_ratio1 <= ratioMax):
+                 if (constants.tower_ratioMin <= aspect_ratio1 <= constants.tower_ratioMax):
                      CenterOfTargetY = (yg+hg/2)
                      CenterOfTargetCoordsY = (yg+hg+CenterOfTargetY)
 
@@ -138,10 +146,8 @@ def trackTower():
         except IndexError: #no contours found
             Table.putBoolean("TowerNoContoursFound", True)
 
-
-def pegComplete():
-    #grab peg status from roboRIO
-    return Table.getBoolean("pegStatus", False)
+def piState():
+    return Table.getNumber("PiState", 0)
 
 #roboRIO streams camera USB servers on ports 1181+
 #Example- 10.0.66.2:1181
