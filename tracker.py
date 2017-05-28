@@ -71,7 +71,8 @@ def trackPeg():
                  ratioMin = 0.30
                  
                  #only run if contour is within ratioValues
-                 if (aspect_ratio1 and aspect_ratio2 <= ratioMax and aspect_ratio1 and aspect_ratio2 >= ratioMin):
+                 if (aspect_ratio1 and aspect_ratio2 <= constants.peg_ratioMax 
+				 and aspect_ratio1 and aspect_ratio2 >= constants.peg_ratioMin):
 
                      #make the largest values always right rect
                      #this prevents negative values when not wanted
@@ -130,7 +131,7 @@ def trackTower():
                  ratioMin = 3.55
                  
                  #only run if contour is within ratioValues
-                 if (ratioMin <= aspect_ratio1 <= ratioMax):
+                 if (constants.tower_ratioMin <= aspect_ratio1 <= constants.tower_ratioMax):
                      CenterOfTargetY = (yg+hg/2)
                      CenterOfTargetCoordsY = (yg+hg+CenterOfTargetY)
 
