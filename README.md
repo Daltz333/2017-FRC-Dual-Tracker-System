@@ -5,7 +5,8 @@
 	ran on any co-processor with python and opencv capabilities. 
 	
 ## Development Environment
-	The code was used in a virtual environment with the following installed
+	**The code was used in a virtual environment with the following installed:**
+	
 	Python 3.4 (Programming Language)
 	OpenCV 3.1.0 (Vision Tracking Library)
 	Numpy (Managing numpy arrays from OpenCV)
