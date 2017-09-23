@@ -17,9 +17,9 @@ tower_green_lower = np.array([72, 114, 169],np.uint8)
 tower_green_upper = np.array([255, 255, 255],np.uint8)
 
 #peg ratio values
-peg_ratioMin = 0.75
+peg_ratioMax = 0.75
 peg_ratioMin = 0.30
 
 #tower ratio values
-tower_ratioMin = 3.92
+tower_ratioMax = 3.92
 tower_ratioMin = 3.55
